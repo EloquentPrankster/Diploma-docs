@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+
+  server:
+    restart: no
+    build:
+      context: ./
+      dockerfile: Dockerfile.server
+    environment:
+      - DATABASE_URL
+      - PORT
+      - JWT_ACCESS
+      - JWT_REFRESH
+    ports:
+      - '3000:3000'
+    networks:
+      - VF_NET
+    depends_on:
+      - db
+
+  static:
+    restart: no
+    build:
+      context: ./
+      dockerfile: Dockerfile.static
+    ports:
+      - '3005:3005'
+  #  client:
+  #    restart: no
+  #    build:
+  #      context: ./
+  #      dockerfile: Dockerfile.client
+  #    ports:
+  #      - '3001:3001'
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    networks:
+      - VF_NET
+
+  adminer:
+    container_name: Adminer
+    image: adminer
+    restart: always
+    ports:
+      - '8080:8080'
+    networks:
+      - VF_NET
+volumes:
+  db_data:
+
+networks:
+  VF_NET:
+    driver: bridge
